@@ -1,0 +1,155 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>ArcGIS Maps SDK for JavaScript Tutorials: Display a map</title>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+    
+        <link rel="stylesheet" href="https://js.arcgis.com/4.27/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.27/"></script>
+    
+        <script>
+      require(["esri/config", "esri/Map", "esri/views/MapView", "esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer", "esri/widgets/Legend", "esri/layers/RouteLayer"], function(esriConfig, Map, MapView, Graphic, GraphicsLayer, FeatureLayer, Legend, RouteLayer) {
+        
+        esriConfig.apiKey = "AAPK77a2c732c8194a9cba6b6f1b1376e5a2Hxn2aHdQ-f5FlUkfgVaA9G5MTzg7C2pVEk7zSy8ytVcySWtwt1htLDqFLKiKAAWd"
+        apiKey = "AAPK77a2c732c8194a9cba6b6f1b1376e5a2Hxn2aHdQ-f5FlUkfgVaA9G5MTzg7C2pVEk7zSy8ytVcySWtwt1htLDqFLKiKAAWd"
+
+const routeLayer = new RouteLayer({
+  stops: [
+    { locationType: "stop", geometry: { x: -71.84557155701664, y: 42.195489469409324 }},
+    { locationType: "stop", geometry: { x: -71.03128800705043, y: 42.350023411668985 }}
+  ],
+  blendMode: "overlay"
+});
+                const map = new Map({
+          basemap: "arcgis-topographic" // Basemap layer service
+        });
+
+        map.add(routeLayer)
+        
+        const view = new MapView({
+          map: map,
+          center: [-71.46, 42.300], // Longitude, latitude
+          zoom: 11, // Zoom level
+          container: "viewDiv" // Div element
+        });
+
+        view.when().then(async () => {
+  // Solve the route using routelayer stops and barries and additional properties from the parsed RouteParameters
+  // object. Use the RouteParameters to provide the apiKey and other setting like directions language and travel
+  // mode.
+  const results = await routeLayer.solve({ apiKey });
+
+  // Use the returned result to update the RouteLayer. This method will overwrite the stops, barriers, directions and
+  // routeInfo properties.
+  routeLayer.update(results);
+});
+
+        const sqlExpressions = ["Choose organization category filters...", "Higher Education", "CRO + CDMO", "Technical Services", "Pharmaceuticals", "Biotech", "Analytical Services", "Laboratory Equipment + Consumables", "Biochemical Manufacturing", "Medical Devices", "Diagnostics", "Incubators", "All Categories"];
+
+
+        const selectFilter = document.createElement("select");
+      selectFilter.setAttribute("class", "esri-widget esri-select"); // this only allows singel select
+      selectFilter.setAttribute("style", "width: 275px; font-family: Avenir Next W00; font-size: 1em;");
+
+      sqlExpressions.forEach(function(sql){
+        let option = document.createElement("option");
+        option.value = sql;
+        option.innerHTML = sql;
+        selectFilter.appendChild(option);
+      });
+
+
+      view.ui.add(selectFilter, "top-right");
+
+        // const legend = new Legend({
+        //     view: view,
+        //     layerInfos: [
+        //       {
+        //         layer: layer,
+        //         title: "BioPike Organizations"
+        //       }
+        //     ]
+        //   });
+
+        //   view.ui.add(legend, "bottom-left");
+
+
+        const companiesRenderer = {
+        "type": "simple",
+        "symbol": {
+            "type": "picture-marker",  // autocasts as new PictureMarkerSymbol()
+            "url": 'data:image/png;base64,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',
+            "width": '24px',
+            "height": '24px'
+        }
+      }
+
+      const companiesLabels = {
+        symbol: {
+          type: "text",
+          color: "#000000",
+          haloColor: "#000000",
+          haloSize: "0px",
+          font: {
+            size: "16px",
+            family: "Noto Sans",
+            style: "italic",
+            weight: "normal"
+          }
+        },
+
+        labelPlacement: "above-center",
+        labelExpressionInfo: {
+          expression: "$feature.Company_Name"
+        }
+      };
+
+
+
+                // Add a feature layer to map with all features visible on client (no filter)
+      const featureLayer = new FeatureLayer({
+        url: "https://services8.arcgis.com/7YRJZJ3vTPgxCMSd/arcgis/rest/services/biopike_companies_v2/FeatureServer/0",
+        outFields: ["*"],
+        popupTemplate: {
+          title: "{Company_Name}",
+          content: "Category: {Category} <br> Address: {Address}"
+        },
+        definitionExpression: "1=0",
+        renderer: companiesRenderer,
+        labelingInfo: [companiesLabels]
+
+      });
+      map.add(featureLayer);
+
+      function setFeatureLayerFilter(expression) {
+        if (expression == "All Categories") {
+            featureLayer.definitionExpression = "1=1";
+        } else {
+            featureLayer.definitionExpression = "Category = '" + expression + "'";
+        }
+      }
+
+      selectFilter.addEventListener('change', function (event) {
+        setFeatureLayerFilter(event.target.value);
+      });
+        
+      });
+          
+    </script>
+
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
